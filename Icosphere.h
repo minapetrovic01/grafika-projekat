@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include "CGLTexture.h"
 
 class Icosphere
 {
@@ -24,6 +25,12 @@ private:
 	std::vector<std::array<GLfloat, 3>> FaceNormals;
 	std::vector<std::array<GLfloat, 3>> vertexNormals;
 
+	std::vector<CGLTexture*> high_resolution;
+	std::vector<CGLTexture*> low_resolution;
+
+	int textureColumns = 2;
+	int textureRows = 2;
+
 	int getMidpoint(GLuint v1, GLuint v2, std::map<std::pair<int, int>, int>& isVisited, int& vertexCount);
 	void tesellationRecursive(int depth, std::map<std::pair<int, int>, int>& isVisited, int triangleCount, int vertexCount);
 
@@ -37,9 +44,9 @@ private:
 	void vectorProduct(GLfloat* v1, GLfloat* v2, GLfloat* v3);
 
 public:
-	Icosphere(int level);
+	Icosphere(int level, std::vector<CGLTexture*> high_resolution, std::vector<CGLTexture*> low_resolution, int textureColumns, int textureRows);
 	void tesellation(int level);
-	void drawSphere(float radius);
+	void drawSphere(float radius,float viewerRadius);
 };
 
 

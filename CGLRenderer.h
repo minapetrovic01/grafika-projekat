@@ -7,6 +7,8 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <vector>
+#include <string>
 #include <afxwin.h>
 #include "CGLMaterial.h"
 #include "CGLTexture.h"
@@ -51,6 +53,12 @@ public:
 	double axisLineLenght = 100;
 
 	CGLTexture* texPlanet;
+
+	std::vector<CGLTexture*> high_resolution;
+	std::vector<CGLTexture*> low_resolution;
+
+	int textureColumns = 2;
+	int textureRows = 2;
 
 	double alpha = 0;
 

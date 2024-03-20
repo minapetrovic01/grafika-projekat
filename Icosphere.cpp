@@ -4,13 +4,15 @@
 #define PI 3.1415926535
 
 
-Icosphere::Icosphere(int level) {
+Icosphere::Icosphere(int level, std::vector<CGLTexture*> high_resolution, std::vector<CGLTexture*> low_resolution, int textureColumns, int textureRows) {
+	//icosahedron vertices = 12
 	this->vertices =
 	{
 		{-A,C,B}, {A,C,B}, {-A,C,-B}, {A,C,-B},
 		{C,B,A}, {C,B,-A}, {C,-B,A}, {C,-B,-A},
 		{B,A,C}, {-B,A, C}, {B,-A,C}, {-B,-A, C}
 	};
+	//icosahedron triangles = 20
 
 	this->triangles =
 	{
@@ -19,17 +21,57 @@ Icosphere::Icosphere(int level) {
 		{7,10,3},{7,6,10},{7,11,6},{11,0,6},{0,1,6},
 		{6,1,10},{9,0,11},{9,11,2},{9,2,5},{7,2,11}
 	};
+
+	this->textureColumns = textureColumns;
+	this->textureRows = textureRows;
+
+	this->high_resolution = high_resolution;
+	this->low_resolution = low_resolution;
+
 	this->tesellation(level);
 	this->calculateNormals();
 	this->textureCoord();
 }
 
-void Icosphere::drawSphere(float radius) {
+void Icosphere::drawSphere(float radius,float viewerRadius) {
 	int length = triangles.size();
+	std::vector<CGLTexture*> textures;
+
+	//if viewer is close to sphere, high resolution textures are used
+	if (viewerRadius <60) {
+		textures = high_resolution;
+	}
+	else {
+		textures = low_resolution;
+	}
+
+	float segment_width = 1.0f / textureColumns;
+	float segment_height = 1.0f / textureRows;
+
 	glBegin(GL_TRIANGLES);
 
 	for (int i = 0; i < length; i++) {
 
+		//set texture
+		/*float row= textureCoordinates[textureFace[i][0]][0] / segment_width;
+		float column = textureCoordinates[textureFace[i][0]][1]/segment_height;
+		int index = (int)(row) + (int)(column) * textureColumns;
+		textures[index]->Select();*/
+
+		//what happens when the tirangle is not in the one texture?????????????????? INTERPOLATION PROBLEM
+
+		//glTexCoord2f(textureCoordinates[textureFace[i][0]][0], textureCoordinates[textureFace[i][0]][1]);
+		//glNormal3fv(&vertexNormals[triangles[i][0]][0]); //per-vertex normal
+		//glVertex3f(vertices[triangles[i][0]][0] * radius, vertices[triangles[i][0]][1] * radius, vertices[triangles[i][0]][2] * radius);
+
+		//glTexCoord2f(textureCoordinates[textureFace[i][1]][0], textureCoordinates[textureFace[i][1]][1]);
+		//glNormal3fv(&vertexNormals[triangles[i][1]][0]); //per-vertex normal
+		//glVertex3f(vertices[triangles[i][1]][0] * radius, vertices[triangles[i][1]][1] * radius, vertices[triangles[i][1]][2] * radius);
+
+		//glTexCoord2f(textureCoordinates[textureFace[i][2]][0], textureCoordinates[textureFace[i][2]][1]);
+		//glNormal3fv(&vertexNormals[triangles[i][2]][0]); //per-vertex normal
+		//glVertex3f(vertices[triangles[i][2]][0] * radius, vertices[triangles[i][2]][1] * radius, vertices[triangles[i][2]][2] * radius);
+	
 		glTexCoord2f(textureCoordinates[textureFace[i][0]][0], textureCoordinates[textureFace[i][0]][1]);
 		glNormal3fv(&vertexNormals[triangles[i][0]][0]); //per-vertex normal
 		glVertex3f(vertices[triangles[i][0]][0] * radius, vertices[triangles[i][0]][1] * radius, vertices[triangles[i][0]][2] * radius);
@@ -145,7 +187,7 @@ void Icosphere::textureCoord() {
 
 	int l = vertices.size();
 	for (int i = 0; i < l; i++) {
-		u = (atan2(vertices[i][0], vertices[i][2]) + PI) / (PI * 2.0f);
+		u = (atan2(vertices[i][0], vertices[i][2]) + PI) / (PI * 2.0f); //atan2 returns -PI to PI thus normalization
 		v = (acos(vertices[i][1]) + PI) / PI - 1.0f;
 		textureCoordinates.push_back({ u, v });
 	}

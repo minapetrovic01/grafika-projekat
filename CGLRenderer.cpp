@@ -21,6 +21,12 @@ CGLRenderer::CGLRenderer()
 
 	this->texPlanet = new CGLTexture();
 
+	for(int i=0;i<this->textureRows;i++)
+		for (int j = 0; j < this->textureColumns; j++)
+		{
+			this->high_resolution.push_back(new CGLTexture());
+			this->low_resolution.push_back(new CGLTexture());
+		}
 }
 
 CGLRenderer::~CGLRenderer()
@@ -30,6 +36,20 @@ CGLRenderer::~CGLRenderer()
 		delete this->texPlanet;
 		this->texPlanet = nullptr;
 	}
+	for(int i=0;i<this->textureRows;i++)
+		for (int j = 0; j < this->textureColumns; j++)
+		{
+			if (this->high_resolution[i * this->textureColumns + j])
+			{
+				delete this->high_resolution[i*this->textureColumns+j];
+				this->high_resolution[i*this->textureColumns+j] = nullptr;
+			}
+			if (this->low_resolution[i * this->textureColumns + j])
+			{
+				delete this->low_resolution[i*this->textureColumns+j];
+				this->low_resolution[i*this->textureColumns+j] = nullptr;
+			}
+		}	
 }
 
 
@@ -72,26 +92,15 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glClearColor(0.8, 0.8, 0.8, 1);
 
 	glEnable(GL_DEPTH_TEST);
-	/*this->platformMat->SetAmbient(.55, .55, .55, 1);
-	this->platformMat->SetDiffuse(.85, .85, .85, 1);
-
-	this->truckMat->SetAmbient(.65, .65, .45, 1);
-	this->truckMat->SetDiffuse(.65, .65, .45, 1);
-
-	this->cargoMat->SetAmbient(.85, .85, .85, 1);
-	this->cargoMat->SetDiffuse(1, 1, 1, 1);*/
+	
 
 	CGLTexture::PrepareTexturing(true);
-	/*this->texAtlas->LoadFromFile((CString)"lab-6-atlas.png");
-	this->texGrass->LoadFromFile((CString)"lab-6-grass.jpeg", GL_REPEAT, GL_REPEAT);*/
-
-	// Globalno ambientno svetlo
+	
 	GLfloat l_model_ambient[] = { .2, .2, .2, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 
-	// Direkciono svetlo 
 	float light_ambient_directional[] = { .35, .35, .35, 1 };
 	float light_diffuse_directional[] = { 1, 1, 1, 1 };
 	float light_specular_directional[] = { .2, .2, .2, 1 };
@@ -99,6 +108,17 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient_directional);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse_directional);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular_directional);
+
+	for (int i = 0; i < this->textureRows; i++)
+		for (int j = 0; j < this->textureColumns; j++)
+		{
+			std::string hs = "cropped_" + std::to_string(i) + "_" + std::to_string(j) + ".jpg";
+
+			std::string ls = "resized_" + std::to_string(i) + "_" + std::to_string(j) + ".jpg";
+
+			this->high_resolution[i * this->textureColumns + j]->LoadFromFile((CString)hs.c_str());
+			this->low_resolution[i * this->textureColumns + j]->LoadFromFile((CString)ls.c_str());
+		}
 
 	
 	// -------------------------------------------
@@ -138,15 +158,10 @@ void CGLRenderer::DrawScene(CDC* pDC)
 
 	this->Light();
 
-	glPushMatrix();
-	{
-		
-	}
-	glPopMatrix();
-
-
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_NORMALIZE);
+
+
 
 	
 
@@ -154,8 +169,8 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	this->texPlanet->Select();
 
 
-	Icosphere icosphere(4);
-	icosphere.drawSphere(10);
+	Icosphere icosphere(4,this->high_resolution,this->low_resolution,this->textureColumns,this->textureRows);
+	icosphere.drawSphere(10,viewR);
 
 	if (this->showAxis)
 		this->DrawAxis(2);
