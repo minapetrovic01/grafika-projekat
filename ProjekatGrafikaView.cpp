@@ -263,7 +263,7 @@ BOOL CProjekatGrafikaView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 	double r = this->m_glRenderer.viewR + zDelta * (-0.01);
 
-	if (r > 5 && r < 50) {
+	if (r > 5 && r < 100) {
 		this->m_glRenderer.viewR = r;
 		Invalidate();
 	}

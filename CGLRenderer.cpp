@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "CGLRenderer.h"
 #include "Icosphere.h"
+#include <algorithm>
+
 
 #define toRad PI/180
 #define fullCircle 2*PI
@@ -112,7 +114,8 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	for (int i = 0; i < this->textureRows; i++)
 		for (int j = 0; j < this->textureColumns; j++)
 		{
-			std::string hs = "cropped_" + std::to_string(i) + "_" + std::to_string(j) + ".jpg";
+			//std::string hs = "cropped_" + std::to_string(i) + "_" + std::to_string(j) + ".jpg";
+			std::string hs = "output_image" + std::to_string(i+1) + std::to_string(j+1) + ".jpg";
 
 			std::string ls = "resized_" + std::to_string(i) + "_" + std::to_string(j) + ".jpg";
 
@@ -123,6 +126,31 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	
 	// -------------------------------------------
 	wglMakeCurrent(NULL, NULL);
+}
+
+
+int calculateTessellationLevel(float distance) {
+	float maxDistance = 200.0f; // Maximum view distance
+	int maxTessellation = 5; // Maximum tessellation level
+	int minTessellation = 2; // Minimum tessellation level
+
+	// Ensure distance is within bounds
+	if (distance < 0.0f)
+		distance = 0.0f;
+	else if (distance > maxDistance)
+		distance = maxDistance;
+
+	// Calculate tessellation level using linear interpolation
+	int tessellation;
+	if (distance <= 100) {
+		float intermediateTessellation = maxTessellation - (maxTessellation - minTessellation) * (distance / 100);
+		tessellation = static_cast<int>(std::round(intermediateTessellation));
+	}
+	else {
+		tessellation = minTessellation;
+	}
+
+	return tessellation;
 }
 
 void CGLRenderer::Reshape(CDC* pDC, int w, int h)
@@ -162,21 +190,21 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	glEnable(GL_NORMALIZE);
 
 
+	int level=calculateTessellationLevel(viewR);
 
-	
+	if (level <= 3)
+	{
+		this->texPlanet->LoadFromFile((CString)"2k_mars.jpg");
+		this->texPlanet->Select();
+	}
 
-	this->texPlanet->LoadFromFile((CString)"2k_mars.jpg");
-	this->texPlanet->Select();
-
-
-	Icosphere icosphere(4,this->high_resolution,this->low_resolution,this->textureColumns,this->textureRows);
-	icosphere.drawSphere(10,viewR);
+	Icosphere icosphere(level,this->high_resolution,this->textureColumns,this->textureRows);
+	icosphere.drawSphere(10);
 
 	if (this->showAxis)
 		this->DrawAxis(2);
 
 	glFlush();
-
 
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
@@ -200,7 +228,6 @@ void CGLRenderer::CalculateViewPosition()
 	viewPosition[0] = viewR * cos(viewAngle[0]) * cos(viewAngle[1]);
 	viewPosition[1] = viewR * sin(viewAngle[0]);
 	viewPosition[2] = viewR * cos(viewAngle[0]) * sin(viewAngle[1]);
-
 
 	lookingAt[0] = lookingAt[2] = 0;
 	lookingAt[1] = lookAtHeight;

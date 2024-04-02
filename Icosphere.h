@@ -4,6 +4,7 @@
 #include <GL/glu.h>
 #include <vector>
 #include <array>
+#include<cmath>
 #include <map>
 #include "CGLTexture.h"
 
@@ -14,6 +15,7 @@ private:
 	const float B = .850f;
 	const float C = 0.0f;
 	float radius;
+	int level;
 
 
 	std::vector<std::array<GLfloat, 3>> vertices;
@@ -44,9 +46,9 @@ private:
 	void vectorProduct(GLfloat* v1, GLfloat* v2, GLfloat* v3);
 
 public:
-	Icosphere(int level, std::vector<CGLTexture*> high_resolution, std::vector<CGLTexture*> low_resolution, int textureColumns, int textureRows);
+	Icosphere(int level, std::vector<CGLTexture*>& high_resolution, int textureColumns, int textureRows);
 	void tesellation(int level);
-	void drawSphere(float radius,float viewerRadius);
+	void drawSphere(float radius);
 };
 
 

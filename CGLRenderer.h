@@ -9,6 +9,7 @@
 #include <math.h>
 #include <vector>
 #include <string>
+#include <cmath>
 #include <afxwin.h>
 #include "CGLMaterial.h"
 #include "CGLTexture.h"
