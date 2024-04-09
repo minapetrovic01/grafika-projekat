@@ -97,8 +97,9 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	
 
 	CGLTexture::PrepareTexturing(true);
+
 	
-	GLfloat l_model_ambient[] = { .2, .2, .2, 1 };
+	GLfloat l_model_ambient[] = { 1., 1., 1, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
@@ -130,9 +131,9 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 
 
 int calculateTessellationLevel(float distance) {
-	float maxDistance = 200.0f; // Maximum view distance
-	int maxTessellation = 5; // Maximum tessellation level
-	int minTessellation = 2; // Minimum tessellation level
+	float maxDistance = 150.0f; // Maximum view distance
+	int maxTessellation = 6; // Maximum tessellation level
+	int minTessellation = 3; // Minimum tessellation level
 
 	// Ensure distance is within bounds
 	if (distance < 0.0f)
@@ -142,8 +143,8 @@ int calculateTessellationLevel(float distance) {
 
 	// Calculate tessellation level using linear interpolation
 	int tessellation;
-	if (distance <= 100) {
-		float intermediateTessellation = maxTessellation - (maxTessellation - minTessellation) * (distance / 100);
+	if (distance <= 120) {
+		float intermediateTessellation = maxTessellation - (maxTessellation - minTessellation) * (distance / 120);
 		tessellation = static_cast<int>(std::round(intermediateTessellation));
 	}
 	else {
@@ -152,6 +153,7 @@ int calculateTessellationLevel(float distance) {
 
 	return tessellation;
 }
+
 
 void CGLRenderer::Reshape(CDC* pDC, int w, int h)
 {
@@ -173,7 +175,7 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	CalculateViewPosition();
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 
-	//glClearColor(0, 0, 0, .0);
+	glClearColor(1, 1, 1, .0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glClear(GL_COLOR_BUFFER_BIT);
 
@@ -182,7 +184,6 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	glLoadIdentity();
 
 	gluLookAt(this->viewPosition[0], this->viewPosition[1], this->viewPosition[2], this->lookingAt[0], this->lookingAt[1], this->lookingAt[2], this->upVector[0], this->upVector[1], this->upVector[2]);
-
 
 	this->Light();
 
@@ -198,7 +199,7 @@ void CGLRenderer::DrawScene(CDC* pDC)
 		this->texPlanet->Select();
 	}
 
-	Icosphere icosphere(level,this->high_resolution,this->textureColumns,this->textureRows);
+	Icosphere icosphere(level,this->high_resolution,this->textureColumns,this->textureRows,this->seeWireframe);
 	icosphere.drawSphere(10);
 
 	if (this->showAxis)
@@ -264,13 +265,24 @@ void CGLRenderer::DrawAxis(double width)
 
 void CGLRenderer::Light()
 {
-	glEnable(GL_LIGHTING);
-
+	if (this->light) 
+	{
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glEnable(GL_LIGHTING);
+	}
+	else
+	{
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glDisable(GL_LIGHTING);
+	}
 	// Direkciono svetlo
 	float light_position[] = { .5, 1, 1, 0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-	glEnable(GL_LIGHT0);
+	if(this->light)
+		glEnable(GL_LIGHT0);
+	else
+		glDisable(GL_LIGHT0);
 
 	
 }

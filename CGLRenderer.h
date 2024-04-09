@@ -61,6 +61,9 @@ public:
 	int textureColumns = 2;
 	int textureRows = 2;
 
+	bool seeWireframe = false;
+	bool light = true;
+
 	double alpha = 0;
 
 	int nSeg;
