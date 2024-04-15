@@ -135,6 +135,8 @@ int calculateTessellationLevel(float distance) {
 	int maxTessellation = 6; // Maximum tessellation level
 	int minTessellation = 3; // Minimum tessellation level
 
+	distance = distance - 10;//napravi da je kao parametar
+
 	// Ensure distance is within bounds
 	if (distance < 0.0f)
 		distance = 0.0f;

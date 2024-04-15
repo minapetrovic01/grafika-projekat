@@ -273,7 +273,7 @@ void Icosphere::fixTexture() {
 				textureFace[i][2] = textureCoordinates.size() - 1;
 			}*/
 			for (int j = 0; j < 3; j++) {
-				if (textureCoordinates[triangles[i][j]][0] < 0.25) {
+				if (textureCoordinates[triangles[i][j]][0] < 0.4) {
 					textureCoordinates.push_back({1+ textureCoordinates[triangles[i][j]][0], textureCoordinates[triangles[i][j]][1] });
 					textureFace[i][j] = textureCoordinates.size() - 1;
 				}
